@@ -7,6 +7,7 @@ import bcrypt from 'bcryptjs';
 const salt = bcrypt.genSaltSync(10);
 import jwt from 'jsonwebtoken'; 
 const secret = 'asdfjkjlj3453';
+import carRoutes from './routes/carRoutes.js';
 
 const corsOptions = {
     credentials:true, 
@@ -32,9 +33,14 @@ MongoClient.connect(CONNECTION_STRING)
     app.post('/usersignup', async(req,res)=>{
         const {username, password} = req.body
         
-        try{const userDoc = await usercollection.insertOne({
-            username, password : bcrypt.hashSync(password, salt),
-        })
+        try{
+            const userDoc = await usercollection.insertOne(
+                {
+                    username, 
+                    password : bcrypt.hashSync(password, salt),
+                    vehicles: [],
+                }
+            );
         jwt.sign({username, id: userDoc._id},
             secret,
             {},
@@ -74,6 +80,8 @@ MongoClient.connect(CONNECTION_STRING)
             res.status(500).json(e)
         }
     })
+
+    app.use('/cars', carRoutes);
 
 })
 
